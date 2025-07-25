@@ -33,6 +33,26 @@ def _store_prices(stock):
         data = BytesIO(data),
         length=len(data)
     )
-    return f'{obj.bucket_name}/{symbol}'
+    return f'{symbol}/prices.json'
+    
+    
+def _load_data_from_minio(obj_name):
+    minio = BaseHook.get_connection('minio')
+    client = Minio(
+        endpoint=minio.extra_dejson['endpoint_url'].split('//')[1],
+        access_key = minio.login,
+        secret_key=minio.password,
+        secure=False,
+    )
+    bucket_name = 'stock-marcket'
+    response = client.get_object(
+        bucket_name=bucket_name,
+        object_name = f'{obj_name}'
+    )
+    json_file=None
+    if response:
+        json_file = response.json()
+        print('------------------------------',type(json_file))
+    return json_file
     
     
