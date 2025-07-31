@@ -19,5 +19,10 @@ add_log(){
     echo "${head} ${message}" >> "${file}"
 }
 
+
+process_data(){
+    echo "json data; $1"
+}
+
 export -f add_log
 
