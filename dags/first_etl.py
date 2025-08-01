@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
-from include.first_etl.python_function import _check_api, _get_the_data, _store_data, _get_raw_data, _run_bash_data_processing
+from include.first_etl.python_function import _check_api, _get_the_data, _store_data, _get_raw_data_and_save_in_temp_file, _run_bash_function_to_process_raw_data
 
 REGION='asia'
 
@@ -60,14 +60,14 @@ with DAG(
         
         get_raw_data = PythonOperator(
             task_id = "get_raw_data",
-            python_callable=_get_raw_data,
+            python_callable=_get_raw_data_and_save_in_temp_file,
             op_kwargs= {'obj_name':'{{ti.xcom_pull(task_ids="Extract_Part.store_raw_data")}}'}
         )
         
         process_raw_data = PythonOperator(
-            task_id = "process_raw_data",
-            python_callable=_run_bash_data_processing,
-            op_kwargs= {'json_data':'{{ti.xcom_pull(task_ids="Transform.get_raw_data")}}'}
+            task_id = 'process_raw_data',
+            python_callable=_run_bash_function_to_process_raw_data,
+            op_kwargs= {'file_path':'{{ti.xcom_pull(task_ids="Transform.get_raw_data")}}'}
         )
         
         get_raw_data >> process_raw_data
@@ -81,3 +81,4 @@ with DAG(
     )    
     
     Extract_Part >> Transform >> end_task
+    

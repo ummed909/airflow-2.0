@@ -21,7 +21,12 @@ add_log(){
 
 
 process_data(){
-    echo "json data; $1"
+    # echo "json data; $1"
+    if [ -f "$1" ]; then
+        echo "$1 : file is exist"
+    else
+        echo "$1 : file does not exist"
+    fi
 }
 
 export -f add_log

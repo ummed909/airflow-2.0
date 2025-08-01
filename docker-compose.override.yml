@@ -4,14 +4,20 @@ services:
   webserver:
     networks:
       - ndsnet
+    volumes:
+      - ./shared_volume:/shared_volume
 
   scheduler:
     networks:
       - ndsnet
+    volumes:
+      - ./shared_volume:/shared_volume
 
   triggerer:
     networks:
       - ndsnet
+    volumes:
+      - ./shared_volume:/shared_volume
 
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
