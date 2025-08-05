@@ -133,4 +133,18 @@ def load_data_to_postgres(file_path):
     df = pd.read_csv(file_path)
     
     df.to_sql("countries",engine, if_exists='replace', index=False)
+
+def load_data_to_aws(file_path):
+    import boto3
+    bucket_name = "firstetlummedc"
+    s3_key = "processed_data/processed.csv"
+    aws_conn = BaseHook.get_conn('aws_default')
+    session = boto3.session.Session(
+        aws_access_key_id=aws_conn.aws_access_key_id,
+        aws_secret_access_key = aws_conn.aws_secret_access_key
+    )
+    s3 = session.client('s3')
+    
+    s3.upload_file(file_path, bucket_name, s3_key)
+    
     
