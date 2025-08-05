@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
-from include.first_etl.python_function import _check_api, _get_the_data, _store_data, _get_raw_data_and_save_in_temp_file, _run_bash_function_to_process_raw_data
+from include.first_etl.python_function import _check_api, _get_the_data, _store_data, _get_raw_data_and_save_in_temp_file, _run_bash_function_to_process_raw_data, load_data_to_postgres
 
 REGION='asia'
 
@@ -71,14 +71,17 @@ with DAG(
         )
         
         get_raw_data >> process_raw_data
+    
+    with TaskGroup("Load") as Load:
+        
+        load_data = PythonOperator(
+            task_id = 'load_data',
+            python_callable=load_data_to_postgres,
+            op_kwargs={'file_path':'{{ti.xcom_pull(task_ids="Transform.process_raw_data")}}'}
+        )
         
         
     
     
-    end_task = PythonOperator(
-        task_id = "end_task",
-        python_callable=called
-    )    
-    
-    Extract_Part >> Transform >> end_task
+    Extract_Part >> Transform >>  Load
     

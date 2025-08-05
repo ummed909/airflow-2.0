@@ -22,11 +22,14 @@ add_log(){
 
 process_data(){
     # echo "json data; $1"
-    if [ -f "$1" ]; then
-        echo "$1 : file is exist"
-    else
-        echo "$1 : file does not exist"
+    local file=$1
+    local output='/shared_volume/proccessed_data.csv'
+    if [ ! -f "$file" ]; then
+        echo "$file : file does not exist"
+        return 1
     fi
+    jq -r '.[] | [.name.common, .capital[0], .region, .area, .population] | @tsv' "$file" > "$output"
+    echo "$output"
 }
 
 export -f add_log

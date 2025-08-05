@@ -117,10 +117,20 @@ def _run_bash_function_to_process_raw_data(file_path):
     bash_command = f"bash -c 'source {bash_path}; process_data {file_path}'"
     try:
         result = subprocess.run(bash_command, shell=True, check=True,capture_output=True, text=True )
-        print(">>>>>>>>>>>>>>>>>>>>>>",result.stdout)
-        return True
+        if os.path.exists(result.stdout.strip()):
+            return result.stdout.strip()
+        else:
+            return None
     except subprocess.CalledProcessError as e:
         print("something went wrong while logging the logs :", e)
         return False
+
+def load_data_to_postgres(file_path):
+    import pandas as pd
+    from sqlalchemy import create_engine
+    engine = create_engine('postgresql://postgres:postgres@postgres:5432/airflow')
     
+    df = pd.read_csv(file_path)
+    
+    df.to_sql("countries",engine, if_exists='replace', index=False)
     
